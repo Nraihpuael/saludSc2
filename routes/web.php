@@ -91,7 +91,9 @@ Route::middleware([
 
     Route::view('/mapacalor', 'analisis.mapascalor')->name('mapascalor.index');
 
+    Route::post('/comparar', [MapaController::class, 'comparar'])->name('mapas.comparar');
     Route::resource('mapas', MapaController::class);
+    
 
     Route::get('/buscar', [BusquedaController::class,'buscar'])->name('buscar');
     Route::get('/redireccionar/{tabla}/{id}', [BusquedaController::class,'redireccionar'])->name('redireccionar');

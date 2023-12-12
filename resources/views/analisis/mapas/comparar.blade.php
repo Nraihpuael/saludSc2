@@ -46,30 +46,6 @@
         </h1>
         <div class="items-center justify-between block sm:flex pb-4">
 
-
-            <div class="flex items-center mb-4 sm:mb-0">
-
-                <form class="sm:pr-3" action="#" method="GET">
-                    <label for="search-input" class="sr-only">Search</label>
-                    <div class="relative w-48 mt-1 sm:w-64 xl:w-96">
-                        <input type="text" name="email" id="search-input"
-                            class="bg-gray-50 border border-gray-300 text-gray-900 sm:text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
-                            placeholder="Buscar" />
-                    </div>
-                </form>
-                <div class="flex items-center w-full sm:justify-end">
-                    <div class="flex pl-2 space-x-1">
-                        <a id="search-button2" onclick="buscarUbi()"
-                            class="inline-flex items-center justify-center w-1/2 px-3 py-2 text-sm font-medium text-center text-white rounded-lg bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 sm:w-auto dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800"
-                            data-drawer-target="drawer-create-product-default"
-                            data-drawer-show="drawer-create-product-default"
-                            aria-controls="drawer-create-product-default" data-drawer-placement="right">
-                            Buscar
-                        </a>
-                    </div>
-                </div>
-            </div>
-
             <div class="flex items-center ml-auto space-x-2 sm:space-x-3">
                 <button type="button" data-refresh onclick="window.location.href = '{{ route('mapas.index') }}'"
                     class="inline-flex items-center justify-center w-1/2 px-3 py-2 text-sm font-medium text-center text-white rounded-lg bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 sm:w-auto dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800">
@@ -78,14 +54,22 @@
 
             </div>
         </div>
-        <div class="relative overflow-x-auto shadow-md sm:rounded-lg">
-            <div class="w-full">
-                <div id="map" style="width: 100%; height: 500px"></div>
-                <div>
-                    <textarea id="countsTextArea" rows="10" cols="30"></textarea>
-                </div>
+        <div class="flex">
+            {{-- Map 1 --}}
+            <div class="w-1/2 p-4">
+                <h2>Map 1: {{ $mapa1->name }}</h2>
+                <div id="map1" style="width: 100%; height: 500px;"></div>
+                <textarea id="countsTextArea1" rows="10" cols="30"
+                style="width: 100%; height: 410px;"></textarea>
             </div>
-
+        
+            {{-- Map 2 --}}
+            <div class="w-1/2 p-4">
+                <h2>Map 2: {{ $mapa2->name }}</h2>
+                <div id="map2" style="width: 100%; height: 500px;"></div>
+                <textarea id="countsTextArea2" rows="10" cols="30"
+                style="width: 100%; height: 410px;"></textarea>
+            </div>
         </div>
     </div>
 
@@ -95,10 +79,11 @@
 
     @push('scripts')
         <script>
-            let map, heatmap, coordinates, dataLayer;
+            let map, heatmap;
 
             window.onload = function() {
-                initMap();
+                initMap1();
+                initMap2();
             }
 
             function buscarUbi() {
@@ -106,12 +91,12 @@
                 searchLocation(input.value);
             }
 
-            function initMap() {
-                var lati = {!! $mapa->latitud !!}
-                var lngi = {!! $mapa->longitud !!}
-
-                coordinates = {!! json_encode($puntos) !!};
-                map = new google.maps.Map(document.getElementById("map"), {
+            function initMap1() {
+                var lati = {!! $mapa1->latitud !!}
+                var lngi = {!! $mapa1->longitud !!}
+                var x = 1;
+                coordinates1 = {!! json_encode($puntos1) !!};
+                map = new google.maps.Map(document.getElementById("map1"), {
                     zoom: 13,
                     center: {
                         lat: lati,
@@ -133,7 +118,7 @@
                 });
 
                 heatmap = new google.maps.visualization.HeatmapLayer({
-                    data: getPoints(),
+                    data: getPoints(coordinates1),
                     map: map,
                 });
 
@@ -148,7 +133,55 @@
 
                     if (loadedFeatures === 15) {
                         clearInterval(interval);
-                        calculateAndDisplayCounts();
+                        calculateAndDisplayCounts(x,coordinates1);
+                    }
+                }, 50);
+
+            }
+
+            function initMap2() {
+                var lati = {!! $mapa2->latitud !!}
+                var lngi = {!! $mapa2->longitud !!}
+                var x = 2;
+                coordinates2 = {!! json_encode($puntos2) !!};
+                map2 = new google.maps.Map(document.getElementById("map2"), {
+                    zoom: 13,
+                    center: {
+                        lat: lati,
+                        lng: lngi
+                    },
+                    mapTypeId: "satellite",
+                });
+                loadGeoJson(map2);
+
+                map2.data.setStyle(function(feature) {
+                    var districtName = feature.getProperty('district');
+                    var color = getDistrictColor(districtName);
+
+                    return {
+                        fillColor: 'transparent',
+                        strokeColor: color,
+                        strokeWeight: 5,
+                    };
+                });
+
+                heatmap = new google.maps.visualization.HeatmapLayer({
+                    data: getPoints(coordinates2),
+                    map: map2,
+                });
+
+                heatmap.set("radius", heatmap.get("radius") ? null : 20);
+
+                // Use setInterval to check if all features are loaded and trigger calculation
+                var interval = setInterval(function () {
+                    var loadedFeatures = 0;
+                    map2.data.forEach(function () {
+                        loadedFeatures++;
+                    });
+
+                    if (loadedFeatures === 15) {
+                        clearInterval(interval);
+                        calculateAndDisplayCounts(x, coordinates2);
                     }
                 }, 100);
 
@@ -198,7 +231,7 @@
                 }
             }
 
-            function getPoints() {
+            function getPoints(coordinates) {
                 var points = [];
                 for (var i = 0; i < coordinates.length; i++) {
                     var latLng = new google.maps.LatLng(coordinates[i].latitud, coordinates[i].longitud);
@@ -261,18 +294,20 @@
                 drawings = [];
             }
 
-            function calculateAndDisplayCounts() {
+            function calculateAndDisplayCounts(x, coordinates) {
                 var counts = {};
                 map.data.forEach(function (feature) {
                     console.log('hi');
                     var districtName = feature.getProperty('district');
-                    var pointsInDistrict = countPointsInDistrict(feature);
+                    var pointsInDistrict = countPointsInDistrict(feature, coordinates);
                     counts[districtName] = pointsInDistrict;    
                 });
-                updateTextArea(counts);
+                updateTextArea(counts,x);
             }
 
-            function countPointsInDistrict(feature) {
+            
+            
+            function countPointsInDistrict(feature, coordinates) {
                 var districtName = feature.getProperty('district');
                 console.log(districtName);
                 var pointsInDistrict = 0;
@@ -293,9 +328,9 @@
                 return pointsInDistrict;
             }
 
-            function updateTextArea(counts) {
-                var textArea = document.getElementById('countsTextArea');
+            function updateTextArea(counts,x) {
                 var text = '';
+                console.log(x);
                 var totalCases = 0;
 
                 // Display counts in the text area
@@ -304,43 +339,19 @@
                     totalCases += counts[districtName];
                 }
                 text += 'Numero de Casos: ' + totalCases;
-                textArea.value = text;
+                
+                if(x == 1){
+                    var textArea = document.getElementById('countsTextArea1');
+                    textArea.value = text;
+                }
+                if(x == 2){
+                    var textArea = document.getElementById('countsTextArea2');
+                    textArea.value = text;
+                }
+                
             }
 
             let drawings = [];
-
-
-
-            // // Para abajo es prueba de las mpodificaciones
-            // var map = new google.maps.Map(document.getElementById('map'), {
-            //     zoom: 10,
-            //     center: {
-            //         lat: 37.7749,
-            //         lng: -122.4194
-            //     }, // Centra el mapa en una ubicación específica
-            // });
-
-            // var center = {
-            //     lat: 37.7749,
-            //     lng: -122.4194
-            // }; // Coordenadas del centro del círculo
-            // var radius = 500; // Radio del círculo en metros
-
-            // // Define una serie de colores para el degradado
-
-            // var circle = new google.maps.Circle({
-            //     strokeColor: '#F5DC09', // Color del borde del círculo
-            //     strokeOpacity: 0.8, // Opacidad del borde
-            //     strokeWeight: 6, // Grosor del borde
-            //     fillColor: '#F22209', // Color de relleno del círculo (puede ser cualquier color)
-            //     fillOpacity: 0.56, // Opacidad del relleno
-            //     center: center, // Centro del círculo
-            //     radius: radius, // Radio del círculo en metros
-            // });
-
-            // circle.setMap(map); // Agrega el círculo al mapa
-
-
             
         </script>
     @endpush

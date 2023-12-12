@@ -59,10 +59,25 @@
                             class="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 sm:text-sm rounded-lg focus:ring-primary-500 focus:border-primary-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500"
                             placeholder="Infecciones de Dengue y Neumonia" required />
                     </div>
-
-
+                    
                     <div class="col-span-6 sm:col-span-3"></div>
 
+                    <div class="col-span-6 sm:col-span-3">
+                        <label for="fecha_ini"
+                            class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Desde</label>
+                        <x-common.input type="date" name="fecha_ini" id="fecha_ini"
+                            placeholder="dd/mm/yyyy" required value="{{ old('fecha_ini') }}" />
+                        <x-jet-input-error for="fecha_ini" />
+                    </div>
+
+                    <div class="col-span-6 sm:col-span-3">
+                        <label for="fecha_fin"
+                            class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Hasta</label>
+                        <x-common.input type="date" name="fecha_fin" id="fecha_fin"
+                            placeholder="dd/mm/yyyy" required value="{{ old('fecha_fin') }}" />
+                        <x-jet-input-error for="fecha_fin" />
+                    </div>
+                    
 
                     <div class="col-span-6 sm:col-span-3">
                         <label for="detalle"
@@ -75,18 +90,13 @@
                     <!-- enfermedades -->
                     <div class="col-span-6 sm:col-span-3">
                         <label for="enfermedades"
-                            class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Seleccione las
-                            Enfermedades
-                            Virales</label>
-                        <select id="role" multiple name="enfermedadesID[]" required
-                            class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
-                            size="4" oninvalid="this.setCustomValidity('Selecciona al menos un campo')"
-                            oninput="this.setCustomValidity('')">
+                            class="block mb-2 text-sm font-medium text-gray-900 dark:text-gray-200">Mapa 1</label>
+                        <select id="role" name="enfermedadesID[]" required
+                            class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">
                             @foreach ($enfermedades as $enfermedad)
                                 <option value="{{ $enfermedad->id }}">{{ $enfermedad->nombre }}</option>
                             @endforeach
                         </select>
-
                     </div>
 
                 </div>

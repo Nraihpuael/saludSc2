@@ -8,7 +8,7 @@ use Illuminate\Database\Eloquent\Model;
 class mapa extends Model
 {
     use HasFactory;
-    protected $fillable = ['name','detalle','latitud','longitud'];
+    protected $fillable = ['name','detalle','latitud','longitud','fecha_ini','fecha_fin'];
 
     // public function enfermedad_viral_mapas(){
     //     return $this->hasMany('App\Models\enfermedad_viral_mapa');

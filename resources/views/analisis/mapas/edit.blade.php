@@ -64,7 +64,23 @@
                     </div>
 
 
+                    <div class="col-span-6 sm:col-span-3">
+                        <label for="fecha_ini"
+                            class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Desde</label>
+                        <x-common.input type="date" name="fecha_ini" id="fecha_ini"
+                            placeholder="dd/mm/yyyy"  value="{{ old('fecha_ini') }}" />
+                        <x-jet-input-error for="fecha_ini" />
+                    </div>
+
                     <div class="col-span-6 sm:col-span-3"></div>
+
+                    <div class="col-span-6 sm:col-span-3">
+                        <label for="fecha_fin"
+                            class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Hasta</label>
+                        <x-common.input type="date" name="fecha_fin" id="fecha_fin"
+                            placeholder="dd/mm/yyyy" value="{{ old('fecha_fin') }}" />
+                        <x-jet-input-error for="fecha_fin" />
+                    </div>
 
 
                     <div class="col-span-6 sm:col-span-3">

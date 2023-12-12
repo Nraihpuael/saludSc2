@@ -16,6 +16,7 @@ use Maatwebsite\Excel\Concerns\WithChunkReading;
 
 class CasosImport implements ToModel, WithChunkReading
 {
+    
     private $startImport = false; // Indica cuando iniciar
 
     public function model(array $row)
@@ -116,6 +117,6 @@ class CasosImport implements ToModel, WithChunkReading
 
     public function chunkSize(): int
     {
-        return 2000;
+        return 5000;
     }
 }

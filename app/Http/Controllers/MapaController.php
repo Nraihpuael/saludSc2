@@ -44,7 +44,7 @@ class MapaController extends Controller
     {
         $mapa = mapa::create($request->all());
         $mapa->enfermedad_virals()->attach($request->enfermedadesID, ['created_at' => now(), 'updated_at' => now()]);
-        return redirect()->route('mapas.create')->with('success', 'ok');
+        return redirect()->route('mapas.index')->with('success', 'ok');
     }
 
     /**
@@ -55,15 +55,27 @@ class MapaController extends Controller
      */
     public function show(Mapa $mapa)
     {
+        //dd($mapa);
         $enfermedadesIds = $mapa->enfermedad_virals->pluck('id')->toArray();
-
-        $userIds = DB::table('estadia_enfermedads')
+        
+        if ($mapa->fecha_ini == null){
+            $userIds = DB::table('estadia_enfermedads')
             ->join('estados', 'estadia_enfermedads.estado_id', '=', 'estados.id')
             ->select('estadia_enfermedads.user_id')
             ->where('estados.estado', 'Confirmado')
             ->whereIn('enfermedad_id', $enfermedadesIds)
             ->get();
 
+        }else{ 
+            $userIds = DB::table('estadia_enfermedads')
+            ->join('estados', 'estadia_enfermedads.estado_id', '=', 'estados.id')
+            ->select('estadia_enfermedads.user_id')
+            ->where('estados.estado', 'Confirmado')
+            ->whereIn('enfermedad_id', $enfermedadesIds)
+            ->whereBetween('estadia_enfermedads.fecha_ini', [$mapa->fecha_ini, $mapa->fecha_fin])
+            ->get();
+        }
+        
         //dd( $userIds[0]);
         $userIdsArray = collect($userIds)->pluck('user_id')->toArray();
         //dd( $userIdsArray);
@@ -72,24 +84,6 @@ class MapaController extends Controller
             ->select('id', 'latitud', 'longitud')
             ->get();
     
-        //dd( $puntos);
-        //$puntos2 = [];
-        //for ($i = 1; $i <= 70; $i++) {
-        //    $puntos2[] = $puntos[0]; 
-        //}
-
-        //for ($i = 1; $i <= 1; $i++) {
-        //    $puntos2[] = $puntos[15]; 
-        //}
-
-        // $puntos2[] = $puntos[0];
-        // $puntos2[] = $puntos[15];
-        // return [$puntos2[0], $puntos[15]];
-        //$puntos = $puntos2;
-        //dd( $puntos[2]);
-        //dd( $puntos);
-        // return $puntos;
-        // En Revision
         return view('analisis.mapas.show',compact('mapa','puntos'));
     }
 
@@ -113,25 +107,10 @@ class MapaController extends Controller
      * @param  \App\Models\Mapa  $mapa
      * @return \Illuminate\Http\Response
      */
-    // public function update(Request $request, Mapa $mapa)
-    // {
-    //     $nuevosValores = $request->only(['name', 'detalle', 'latitud', 'longitud']);
-    //     mapa::whereIn('id', [$mapa->id])->update($nuevosValores);
-    //     enfermedad_viral_mapa::where('mapa_id', $mapa->id)->delete();
-
-    //     foreach ($request->enfermedadesID as $enfermedad_id) {
-    //         enfermedad_viral_mapa::create([
-    //             'mapa_id' => $mapa->id,
-    //             'enfermedad_viral_id' => $enfermedad_id
-    //         ]);
-    //     }
-
-    //     return $request;
-    // }
 
     public function update(Request $request, Mapa $mapa)
     {
-        $nuevosValores = $request->only(['name', 'detalle', 'latitud', 'longitud']);
+        $nuevosValores = $request->only(['name', 'detalle', 'latitud', 'longitud','fecha_ini','fecha_fin']);
         $mapa->update($nuevosValores);
         $mapa->enfermedad_virals()->detach();
         $mapa->enfermedad_virals()->attach($request->enfermedadesID, ['created_at' => now(), 'updated_at' => now()]);
@@ -140,12 +119,7 @@ class MapaController extends Controller
     }
 
 
-    /**
-     * Remove the specified resource from storage.
-     *
-     * @param  \App\Models\Mapa  $mapa
-     * @return \Illuminate\Http\Response
-     */
+
     public function destroy(Mapa $mapa)
     {
         $mapa->enfermedad_virals()->detach();
@@ -153,5 +127,70 @@ class MapaController extends Controller
         return redirect()->route('mapas.index',$mapa);
     }
 
+    public function comparar(Request $request)
+    {
+        //dd($request);
+        $mapa1 = Mapa::find($request->map1);
+        $mapa2 = Mapa::find($request->map2);
+
+        //dd($map2);
+        $enfermedadesIds1 = $mapa1->enfermedad_virals->pluck('id')->toArray();
+        $enfermedadesIds2 = $mapa2->enfermedad_virals->pluck('id')->toArray();
+
+        if ($mapa1->fecha_ini == null){
+
+            $userIds1 = DB::table('estadia_enfermedads')
+            ->join('estados', 'estadia_enfermedads.estado_id', '=', 'estados.id')
+            ->select('estadia_enfermedads.user_id')
+            ->where('estados.estado', 'Confirmado')
+            ->whereIn('enfermedad_id', $enfermedadesIds1)
+            ->get();
+
+        }else{ 
+            $userIds1 = DB::table('estadia_enfermedads')
+            ->join('estados', 'estadia_enfermedads.estado_id', '=', 'estados.id')
+            ->select('estadia_enfermedads.user_id')
+            ->where('estados.estado', 'Confirmado')
+            ->whereIn('enfermedad_id', $enfermedadesIds1)
+            ->whereBetween('estadia_enfermedads.fecha_ini', [$mapa1->fecha_ini, $mapa1->fecha_fin])
+            ->get();
+        }
+        
+
+        if ($mapa2->fecha_ini == null){
+            $userIds2 = DB::table('estadia_enfermedads')
+            ->join('estados', 'estadia_enfermedads.estado_id', '=', 'estados.id')
+            ->select('estadia_enfermedads.user_id')
+            ->where('estados.estado', 'Confirmado')
+            ->whereIn('enfermedad_id', $enfermedadesIds2)
+            ->get();
+
+        }else{ 
+            $userIds2 = DB::table('estadia_enfermedads')
+            ->join('estados', 'estadia_enfermedads.estado_id', '=', 'estados.id')
+            ->select('estadia_enfermedads.user_id')
+            ->where('estados.estado', 'Confirmado')
+            ->whereIn('enfermedad_id', $enfermedadesIds2)
+            ->whereBetween('estadia_enfermedads.fecha_ini', [$mapa2->fecha_ini, $mapa2->fecha_fin])
+            ->get();
+        }
+
+
+        $userIdsArray1 = collect($userIds1)->pluck('user_id')->toArray();
+        $userIdsArray2 = collect($userIds2)->pluck('user_id')->toArray();
+
+        $puntos1 = User::whereIn('id', $userIdsArray1)
+            ->whereNotNull('latitud')
+            ->select('id', 'latitud', 'longitud')
+            ->get();
+    
+        $puntos2 = User::whereIn('id', $userIdsArray2)
+            ->whereNotNull('latitud')
+            ->select('id', 'latitud', 'longitud')
+            ->get();
+
+        //dd($puntos1, $puntos2);    
+        return view('analisis.mapas.comparar', compact('mapa1','puntos1','mapa2','puntos2'));
+    }
 
 }

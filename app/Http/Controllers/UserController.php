@@ -169,6 +169,7 @@ class UserController extends Controller
 
         //dd($request);
         $validatedData = $request->validate([
+            'email' => 'nullable|email|unique:users,email',
             'ubicacion' => 'nullable|string',
             'longitud' => 'nullable|numeric',
             'latitud' => 'nullable|numeric',
@@ -177,6 +178,7 @@ class UserController extends Controller
         //dd($validatedData);
         // Procesar y guardar los datos en la base de datos
 
+        $user->email = $validatedData['email'];
         $user->ubicacion = $validatedData['ubicacion'];
         $user->longitud = $validatedData['longitud'];
         $user->latitud = $validatedData['latitud'];

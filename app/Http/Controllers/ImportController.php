@@ -62,6 +62,8 @@ class ImportController extends Controller
         ]);
 
         if ($request->hasFile('file')) {
+            //$path = $request->file('file')->getRealPath();       
+            //$data =  Excel::import(new CasosImport, $request->file('file')->store('temp'));
             $path = $request->file('file')->getRealPath();
             $data = Excel::import(new CasosImport, $path);
 
